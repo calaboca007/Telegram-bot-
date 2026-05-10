@@ -75,3 +75,25 @@ app.add_handler(CommandHandler("lyrics", lyrics))
 
 print("Bot is running...")
 app.run_polling()
+async def download(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = " ".join(context.args)
+
+    if not query:
+        await update.message.reply_text("❌ Type a song name.")
+        return
+
+    url = f"https://api.deezer.com/search?q={query}"
+    res = requests.get(url).json()
+
+    if not res["data"]:
+        await update.message.reply_text("❌ No song found.")
+        return
+
+    song = res["data"][0]
+    preview = song["preview"]
+
+    await update.message.reply_audio(
+        audio=preview,
+        title=song["title"],
+        performer=song["artist"]["name"]
+    )
