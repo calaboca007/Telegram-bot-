@@ -16,6 +16,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 # MUSIC SEARCH (WITH COVER ART)
+
 async def music(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = " ".join(context.args)
 
@@ -26,33 +27,18 @@ async def music(update: Update, context: ContextTypes.DEFAULT_TYPE):
     url = f"https://api.deezer.com/search?q={query}"
     res = requests.get(url).json()
 
-    if "data" not in res or len(res["data"]) == 0:
-        await update.message.reply_text("❌ No song found.")
+    if not res["data"]:
+        await update.message.reply_text("❌ No songs found.")
         return
 
-    song = res["data"][0]
+    message = "🎵 Top Results:\n\n"
 
-    title = song["title"]
-    artist = song["artist"]["name"]
-    album = song["album"]["title"]
-    cover = song["album"]["cover_big"]
-    preview = song["preview"]
+    for i, song in enumerate(res["data"][:5]):
+        title = song["title"]
+        artist = song["artist"]["name"]
+        message += f"{i+1}. {title} - {artist}\n"
 
-    caption = (
-        f"🎵 {title}\n"
-        f"👤 {artist}\n"
-        f"💿 {album}\n\n"
-        f"🎧 Preview available below"
-    )
-
-    await update.message.reply_photo(
-        photo=cover,
-        caption=caption
-    )
-
-    await update.message.reply_text(f"🔗 Preview link:\n{preview}")
-
-
+    await update.message.reply_text(message)
 # LYRICS COMMAND
 async def lyrics(update: Update, context: ContextTypes.DEFAULT_TYPE):
     text = " ".join(context.args)
